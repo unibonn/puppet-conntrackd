@@ -282,6 +282,25 @@ class conntrackd::config (
   Optional[String]                 $udp_ipv4_dest              = $conntrackd::udp_ipv4_dest,
   Optional[String]                 $udp_ipv6_dest              = $conntrackd::udp_ipv6_dest,
   Integer                          $udp_port                   = $conntrackd::udp_port,
+  Hash[String, Struct[
+    ipv4_address    => String,
+    ipv4_address    => String,
+    ipv4_interface  => String,
+    mcast_group     => String,
+    sndsocketbuffer => Optional[Integer],
+    rcvsocketbuffer => Optional[Integer],
+    checksum        => Optional[String],
+  ]]                               $mcast_fallback_interfaces  = $conntrackd::mcast_fallback_interfaces,
+  Hash[String, Struct[
+    ipv4_address     => Optional[String],
+    udp_ipv4_dest    => Optional[String],
+    udp_ipv6_address => Optional[String],
+    udp_ipv6_dest    => Optional[String],
+    udp_port         => Integer,
+    sndsocketbuffer  => Optional[Integer],
+    rcvsocketbuffer  => Optional[Integer],
+    checksum         => Optional[String],
+  ]]                               $udp_fallback_interfaces    = $conntrackd::udp_fallback_interfaces,
   Array                            $filter_accept_protocols    = $conntrackd::filter_accept_protocols,
   Enum['Kernelspace','Userspace']  $filter_from                = $conntrackd::filter_from,
   String                           $tcp_window_tracking        = $conntrackd::tcp_window_tracking,
@@ -322,6 +341,8 @@ class conntrackd::config (
   if $disable_external_cache == 'On' and $commit_timeout {
     fail("\"${module_name}\": commit_timeout must not be set if disable_external_cache is set on")
   }
+
+  #FIXME: sanity checks for fallback interface arrays
 
   # manage config dir
   file { 'conntrackd-confdir':

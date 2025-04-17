@@ -18,7 +18,11 @@ Sync {
 	}
 
 <% if $conntrackd::config::protocol == 'Multicast' { -%>
+<%   if ! $conntrackd::config::mcast_fallback_interfaces.empty { -%>
+	Multicast Default {
+<%   } else { -%>
 	Multicast {
+<%   } -%>
 		IPv4_address <%= $conntrackd::config::ipv4_address %>
 		Group <%= $conntrackd::config::mcast_group %>
 		IPv4_interface <%= $conntrackd::config::ipv4_interface %>
@@ -27,8 +31,28 @@ Sync {
 		RcvSocketBuffer <%= $conntrackd::config::rcvsocketbuffer %>
 		Checksum <%= $conntrackd::config::checksum %>
 	}
+<%   $conntrackd::config::mcast_fallback_interfaces.each |$_interface, $_iconfig| {
+       $_config = merge($_iconfig, {
+                                     sndsocketbuffer => $conntrackd::config::sndsocketbuffer,
+                                     rcvsocketbuffer => $conntrackd::config::rcvsocketbuffer,
+                                     checksum        => $conntrackd::config::checksum,
+                                   }) -%>
+	Multicast {
+		IPv4_address <%= $_config['ipv4_address'] %>
+		Group <%= $_config['mcast_group'] %>
+		IPv4_interface <%= $_config['ipv4_interface'] %>
+		Interface <%= $_interface %>
+		SndSocketBuffer <%= $_config['sndsocketbuffer'] %>
+		RcvSocketBuffer <%= $_config['rcvsocketbuffer'] %>
+		Checksum <%= $_config['checksum'] %>
+	}
+<%   } -%>
 <% } elsif $conntrackd::config::protocol == 'UDP' { -%>
+<%   if ! $conntrackd::config::udp_fallback_interfaces.empty { -%>
+	UDP Default {
+<%   } else { -%>
 	UDP {
+<%   } -%>
 <%   if $conntrackd::config::ipv4_address { -%>
 		IPv4_address <%= $conntrackd::config::ipv4_address %>
 		IPv4_Destination_Address <%= $conntrackd::config::udp_ipv4_dest %>
@@ -42,6 +66,27 @@ Sync {
 		RcvSocketBuffer <%= $conntrackd::config::rcvsocketbuffer %>
 		Checksum <%= $conntrackd::config::checksum %>
 	}
+<%   $conntrackd::config::udp_fallback_interfaces.each |$_interface, $_iconfig| {
+       $_config = merge($_iconfig, {
+                                     sndsocketbuffer => $conntrackd::config::sndsocketbuffer,
+                                     rcvsocketbuffer => $conntrackd::config::rcvsocketbuffer,
+                                     checksum        => $conntrackd::config::checksum,
+                                   }) -%>
+	UDP {
+<%   if $_config['ipv4_address'] { -%>
+		IPv4_address <%= $_config['ipv4_address'] %>
+		IPv4_Destination_Address <%= $_config['udp_ipv4_dest'] %>
+<%   } elsif $_config['udp_ipv6_address'] { -%>
+		IPv6_address <%= $_config['udp_ipv6_address'] %>
+		IPv6_Destination_Address <%= $_config['udp_ipv6_dest'] %>
+<%   } -%>
+		Port <%= $_config['udp_port'] %>
+		Interface <%= $_interface %>
+		SndSocketBuffer <%= $_config['sndsocketbuffer'] %>
+		RcvSocketBuffer <%= $_config['rcvsocketbuffer'] %>
+		Checksum <%= $_config['checksum'] %>
+	}
+<%   } -%>
 <% } -%>
 
 	Options {
