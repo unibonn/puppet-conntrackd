@@ -250,6 +250,11 @@
 #            you can enable it with this option.
 #   Default: <tt>Off</tt>
 #
+# @param expectation_sync
+#   boolean or Array[String]: Enable synchronization of listed conntrack helpers.
+#                             Off (false) by default, if true, enables all helpers, list can be specified.
+#   Default: <tt>false</tt>
+#
 # @param track_tcp_states
 #   array:   The specific TCP states to sync
 #   Default: <tt>[ 'ESTABLISHED', 'CLOSED', 'TIME_WAIT', 'CLOSE_WAIT' ]</tt>
@@ -383,6 +388,7 @@ class conntrackd (
   Enum['Kernelspace','Userspace']  $filter_from,
 
   String                           $tcp_window_tracking,
+  Variant[Boolean,Array[String,1]] $expectation_sync,
   Array                            $track_tcp_states,
 
   String                           $scheduler_type,

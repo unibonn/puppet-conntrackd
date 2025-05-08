@@ -91,6 +91,15 @@ Sync {
 
 	Options {
 		TCPWindowTracking <%= $conntrackd::config::tcp_window_tracking %>
+  <% if $conntrackd::config::expectation_sync =~ Boolean { -%>
+		ExpectationSync <%= bool2str($conntrackd::config::expectation_sync, 'On', 'Off') %>
+  <% } else { -%>
+		ExpectationSync {
+    <% $conntrackd::config::expectation_sync.each |$_nf_expect_helper| { -%>
+			<%= $_nf_expect_helper %>
+    <% } -%>
+		}
+  <% } -%>
 	}
 }
 
